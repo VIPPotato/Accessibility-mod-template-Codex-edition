@@ -2,7 +2,7 @@
 
 So you've seen some impressive examples of people creating entire complex mods with the help of AI, and you've been wondering if you could do the same?
 
-I definitely wanted to find out, and as I haven't found a comprehensive guide yet, I've decided to create my own as I explored this topic myself. Which then turned into the idea to make a whole template, allowing people to dive right into mod development without hours of preparation.
+I definitely wanted to find out, and I haven't found a comprehensive guide, so I've decided to create my own while I learned myself how to do this. Which then turned into the idea to make a whole template which allows people to dive right into mod development without hours of preparation.
 
 ## Important Disclaimer
 
@@ -56,8 +56,8 @@ We all have those games which we've been enthusiastic about for years on end and
 ## What the general work flow will look like
 
 The first time you run the starting setup, Claude Code will prompt you to install several tools for logging, decompiling and compiling. This will take a little while.
-Then, after you've answered all the initial questions, e.g. where the game is located and what engine it is based on, Claude will propt you to decompile the game's source code, and then analyze it, getting an overview of what will need to be done to make the game accessible.
-Then the actual work begins: You can decide which features you'll want to build first. I'd recommend to start with a very basic version which just annonces something when the game is started, an to then move on to the first things you'll interact with in the game, e.g. main menu or starting screen.
+Then, after you've answered all the initial questions, e.g. where the game is located and what engine it is based on, Claude will prompt you to decompile the game's source code, and then analyze it, getting an overview of what will need to be done to make the game accessible.
+Then the actual work begins: You can decide which features you'll want to build first. I'd recommend to start with a very basic version which just announces something when the game is started, an to then move on to the first things you'll interact with in the game, e.g. main menu or starting screen.
 The AI will write a lot of code and test it (this is just for technical errors, not for actual functionality), then you can start the game, see what the mod does, and tell claude what is not working.
 And once the first feature is functional (or functional enough for the moment), you can continue with the next one.
 
