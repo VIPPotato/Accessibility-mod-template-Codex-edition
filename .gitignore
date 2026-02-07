@@ -29,6 +29,9 @@ Thumbs.db
 *.tmp
 *.temp
 
+# Claude Code local settings
+.claude/
+
 # Local working files (not for distribution)
 forum-post.txt
 *.local.*

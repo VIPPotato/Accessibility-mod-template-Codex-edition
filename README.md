@@ -51,13 +51,13 @@ We all have those games which we've been enthusiastic about for years on end and
 
 1. Restart the command line (i.e. close the window, open the command line again via the context menu in the same folder, and type "claude")
 2. Simply type something like "hello" or "new project"
-3. The setup process will guide you through lots of steps to get you started with the foundation of your mod development
+3. The setup process will guide you through all the steps to get you started with the foundation of your mod development
 
 ## What the general work flow will look like
 
-The first time you run the starting setup, Claude Code will prompt you to install several tools for logging, decompiling and compiling. This will take a little while.
-Then, after you've answered all the initial questions, e.g. where the game is located and what engine it is based on, Claude will prompt you to decompile the game's source code, and then analyze it, getting an overview of what will need to be done to make the game accessible.
-Then the actual work begins: You can decide which features you'll want to build first. I'd recommend to start with a very basic version which just announces something when the game is started, an to then move on to the first things you'll interact with in the game, e.g. main menu or starting screen.
+The first time you run the starting setup, Claude Code will prompt you to install several tools e.g. for logging and other technical background stuff. This will take a little while.
+Then, after you've answered all the initial questions, e.g. where the game is located and what engine it is based on, Claude will guide you through some additional steps in order to get a first overview of what will need to be done to make the game accessible.
+Then the actual work begins: You can decide which features you'll want to build first. I'd recommend to start with a very basic version which just announces something when the game is started, an to then move on to the first things you'll interact with in the game, like the main menu or starting screen.
 The AI will write a lot of code and test it (this is just for technical errors, not for actual functionality), then you can start the game, see what the mod does, and tell claude what is not working.
 And once the first feature is functional (or functional enough for the moment), you can continue with the next one.
 
