@@ -18,3 +18,10 @@ Desktop.ini
 .vscode/
 *.user
 *.suo
+# MelonLoader output (don't commit game DLLs)
+*.dll
+!templates/**
+
+# Local IDE settings
+.idea/
+.vscode/

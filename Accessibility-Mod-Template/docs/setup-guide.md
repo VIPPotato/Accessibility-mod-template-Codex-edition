@@ -6,7 +6,7 @@ This guide is only needed for the initial project setup.
 
 ## Setup Interview
 
-When the user first interacts with Claude in this directory (e.g., "Hello", "New project", "Let's go"), conduct this interview.
+When the user first interacts with Codex in this directory (e.g., "Hello", "New project", "Let's go"), conduct this interview.
 
 **Ask these questions ONE AT A TIME. Wait for the answer after EACH question.**
 
@@ -28,7 +28,7 @@ Question: How well do you know this game? (Very well / Somewhat / Not at all)
 
 - **"Very well"**: The user can guide feature prioritization and explain mechanics. Note this in project_status.md.
 - **"Somewhat"**: The user has some knowledge but may need help understanding game systems. Note for later.
-- **"Not at all"**: Mark for tutorial text extraction after decompilation (see Step 7b). During feature planning, Claude should explain discovered game mechanics in more detail.
+- **"Not at all"**: Mark for tutorial text extraction after decompilation (see Step 7b). During feature planning, Codex should explain discovered game mechanics in more detail.
 
 Remember the answer - it affects Step 7b and Phase 1.5 (feature planning).
 
@@ -531,7 +531,7 @@ Question: Do you have the .NET SDK already installed?
 
 Check with: `dotnet --version` in PowerShell.
 
-If no, install via WinGet (preferred — Claude Code can run this automatically):
+If no, install via WinGet (preferred — Codex can run this automatically):
 
 ```powershell
 winget install Microsoft.DotNet.SDK.8
@@ -551,7 +551,7 @@ If no, explain options:
 
 **ILSpy (recommended):**
 
-Install the command-line tool via dotnet (preferred — Claude Code can run this automatically):
+Install the command-line tool via dotnet (preferred — Codex can run this automatically):
 
 ```powershell
 dotnet tool install ilspycmd -g
@@ -559,9 +559,9 @@ dotnet tool install ilspycmd -g
 
 After installation, **restart the terminal** so the `ilspycmd` command is available.
 
-- **Advantage:** Fully command-line controlled, Claude Code can automate the entire decompilation
+- **Advantage:** Fully command-line controlled, Codex can automate the entire decompilation
 - Command-line usage: `ilspycmd -p -o decompiled "[Game]_Data\Managed\Assembly-CSharp.dll"`
-- This makes the entire decompilation process automatable — Claude Code can do it for you
+- This makes the entire decompilation process automatable — Codex can do it for you
 
 Optionally, also install the GUI version via WinGet:
 
@@ -583,7 +583,7 @@ If neither WinGet nor dotnet tool is available, manual download: https://github.
 2. Use Ctrl+O to select the DLL (e.g., Assembly-CSharp.dll)
 3. In the "File" menu, select "Export to Project"
 4. Press Tab once - lands on an unlabeled button for target directory selection
-5. There, select the target directory (best to create a "decompiled" subdirectory in this project directory beforehand, so Claude Code can easily find the source code)
+5. There, select the target directory (best to create a "decompiled" subdirectory in this project directory beforehand, so Codex can easily find the source code)
 6. After confirming the directory selection, press Tab repeatedly until you reach the "Export" button
 7. The export takes about half a minute
 8. Then close dnSpy
@@ -668,11 +668,11 @@ After the interview:
 - **Determine mod name:** `[GameName]Access` - abbreviate if 3+ words (e.g., "PetIdleAccess", "DsaAccess" for "Das Schwarze Auge")
 - Create `project_status.md` from `templates/project_status.md.template` - fill in all collected information and check off completed setup steps. **This is the central tracking document for the entire project.** Update it at every significant milestone: features completed, bugs discovered, architecture decisions, notes for the next session.
 - Create `docs/game-api.md` from `templates/game-api.md.template` as placeholder for game discoveries
-- Enter the concrete paths in CLAUDE.md under "Environment"
+- Enter the concrete paths in AGENTS.md under "Environment"
 
-#### Trim CLAUDE.md after setup
+#### Trim AGENTS.md after setup
 
-Once `project_status.md` is created, trim CLAUDE.md to save tokens for the rest of the project:
+Once `project_status.md` is created, trim AGENTS.md to save tokens for the rest of the project:
 
 1. **Replace the "Project Start" section** with:
    ```
@@ -713,12 +713,12 @@ After the interview, read this checklist:
 
 **Explain this to the user early (during or after setup):**
 
-Claude Code re-reads the entire conversation every time you send a message. This means long conversations cost increasingly more tokens. To be efficient:
+Codex re-reads the entire conversation every time you send a message. This means long conversations cost increasingly more tokens. To be efficient:
 
 - **Start a new conversation** whenever you finish a feature or a distinct task. Don't keep going in the same conversation for hours.
 - **Roughly 30-40 messages** is a good point to consider starting fresh.
-- **Before starting a new conversation:** Claude should always update `project_status.md` so the next conversation knows exactly where things stand.
-- **When you come back:** Just say "hello" or "let's continue" - Claude reads `project_status.md` and picks up where you left off.
+- **Before starting a new conversation:** Codex should always update `project_status.md` so the next conversation knows exactly where things stand.
+- **When you come back:** Just say "hello" or "let's continue" - Codex reads `project_status.md` and picks up where you left off.
 
 This is not a limitation but a workflow advantage: fresh conversations have a clear context and make fewer mistakes.
 
@@ -731,12 +731,12 @@ This is not a limitation but a workflow advantage: fresh conversations have a cl
 ### What you need to do
 
 - **Starting a session:** Just say "hello", "let's continue", or jump straight in with "I tested the menu, here's what happened: ..."
-- **You don't need to repeat** the game name, the project setup, what was done before, or technical details. Claude reads `project_status.md` and knows all of that.
-- **Reporting test results:** Just describe what happened naturally. "The menu works but item 3 is skipped" or "Nothing happens when I press F2" is enough. Claude will ask follow-up questions if needed.
-- **Requesting features:** "Let's do the inventory next" or "Can we add health announcements?" — Claude checks the feature plan and starts working.
-- **If something feels wrong:** "I think X broke since last time" — Claude will investigate.
+- **You don't need to repeat** the game name, the project setup, what was done before, or technical details. Codex reads `project_status.md` and knows all of that.
+- **Reporting test results:** Just describe what happened naturally. "The menu works but item 3 is skipped" or "Nothing happens when I press F2" is enough. Codex will ask follow-up questions if needed.
+- **Requesting features:** "Let's do the inventory next" or "Can we add health announcements?" — Codex checks the feature plan and starts working.
+- **If something feels wrong:** "I think X broke since last time" — Codex will investigate.
 
-### What Claude does automatically
+### What Codex does automatically
 
 1. Reads `project_status.md` — knows current phase, all features, issues, and notes from last session
 2. If there are pending tests, asks you about the results
@@ -746,19 +746,19 @@ This is not a limitation but a workflow advantage: fresh conversations have a cl
 ### The cycle
 
 ```
-Session start → Claude reads project_status.md → summarizes → asks what to do
-  → You say what to work on (or Claude suggests)
-  → Claude codes → builds → you test in game → report results
+Session start → Codex reads project_status.md → summarizes → asks what to do
+  → You say what to work on (or Codex suggests)
+  → Codex codes → builds → you test in game → report results
   → Repeat until feature is done
-  → Claude updates project_status.md → suggests new session
+  → Codex updates project_status.md → suggests new session
 ```
 
 ### When things go wrong between sessions
 
-- **Game updated and mod broke:** Tell Claude, it will check what changed
-- **You forgot what was planned:** Just say "hello" — Claude tells you
-- **You want to change direction:** Just say so, Claude adapts the plan
-- **You lost your test notes:** Claude can rebuild context from `project_status.md` and the code
+- **Game updated and mod broke:** Tell Codex, it will check what changed
+- **You forgot what was planned:** Just say "hello" — Codex tells you
+- **You want to change direction:** Just say so, Codex adapts the plan
+- **You lost your test notes:** Codex can rebuild context from `project_status.md` and the code
 
 ---
 
@@ -1119,7 +1119,7 @@ After analysis, `docs/game-api.md` should contain:
 8. Event hooks for Harmony
 
 **Why detailed UI documentation matters:**
-Every menu feature will need to read text from UI elements. If you document the access pattern once, you (and Claude Code) can reuse it everywhere without re-analyzing each time.
+Every menu feature will need to read text from UI elements. If you document the access pattern once, you (and Codex) can reuse it everywhere without re-analyzing each time.
 
 #### 1.9 Search and Analyze Tutorial (Tier 3 - When planning tutorial accessibility)
 
@@ -1236,27 +1236,27 @@ This order is just a suggestion. Depending on the game, it may make sense to pri
 
 The development workflow for testing mod changes:
 
-1. **Write/modify code** - Claude writes or modifies the mod source code
+1. **Write/modify code** - Codex writes or modifies the mod source code
 2. **Build** - Run `dotnet build [ModName].csproj` to compile the mod into a DLL
 3. **Auto-copy** - The DLL is automatically copied to the game's mod folder: `Mods/` for MelonLoader or `BepInEx/plugins/` for BepInEx (if the CopyToMods target is set up in the csproj)
 4. **Start the game** - Launch the game normally (the mod loader loads the mod automatically)
 5. **Test** - Check if the new feature works as expected
 6. **Close the game** - **Always close the game completely before the next build!** The DLL file is locked while the game is running.
-7. **Report back** - Tell Claude what worked and what didn't. Be specific: "It says X but should say Y" or "Nothing happens when I press F2"
-8. **Repeat** - Claude fixes issues based on your feedback, then build and test again
+7. **Report back** - Tell Codex what worked and what didn't. Be specific: "It says X but should say Y" or "Nothing happens when I press F2"
+8. **Repeat** - Codex fixes issues based on your feedback, then build and test again
 
 **Important notes for the user:**
 - You will need to close and restart the game for every code change - there is no "hot reload"
 - If the mod doesn't seem to load at all, check the log for errors: `MelonLoader/Latest.log` (MelonLoader) or `BepInEx/LogOutput.log` (BepInEx)
 - If you hear nothing from the screen reader but the log shows the mod loaded: Check if Tolk DLLs are in the right place and matching the architecture
-- Build errors (compilation failures) are shown in the terminal - Claude can read and fix them directly
+- Build errors (compilation failures) are shown in the terminal - Codex can read and fix them directly
 - Runtime errors (crashes during gameplay) appear in the MelonLoader log
 
 For beginners: Think of it like editing a document and printing it. You make changes, "print" (build), then check the printout (test in game). If something is wrong, you go back and edit again.
 
-### Phase 2.5: Update CLAUDE.md (after first successful build)
+### Phase 2.5: Update AGENTS.md (after first successful build)
 
-**After the first successful build (or earlier if info is known), update CLAUDE.md with project-specific values:**
+**After the first successful build (or earlier if info is known), update AGENTS.md with project-specific values:**
 
 Update the "Environment" section with:
 - Game directory path
@@ -1274,7 +1274,7 @@ Add any project-specific notes:
 - Deviations from template patterns
 - Known quirks or workarounds
 
-**Keep CLAUDE.md short and concise** - it's only for Claude Code, not documentation.
+**Keep AGENTS.md short and concise** - it's only for Codex, not documentation.
 
 Example addition:
 ```markdown

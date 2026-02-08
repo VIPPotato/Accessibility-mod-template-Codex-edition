@@ -25,7 +25,7 @@
 - [ ] Tutorial texts extracted (if applicable)
 - [ ] Multilingual support decided
 - [ ] Project directory set up (csproj, Main.cs, etc.)
-- [ ] CLAUDE.md updated with project-specific values
+- [ ] AGENTS.md updated with project-specific values
 - [ ] First build successful
 - [ ] "Mod loaded" announcement working in game
 

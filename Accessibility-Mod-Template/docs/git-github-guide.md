@@ -123,7 +123,7 @@ A commit is a snapshot. Here's how to make one:
 
 ```
 git add .gitignore
-git add CLAUDE.md
+git add AGENTS.md
 git add docs/
 git add templates/
 git add scripts/
@@ -148,7 +148,7 @@ git commit -m "Initial project setup with basic framework"
 
 ### The Basic Cycle
 
-1. **Work on your code** (with Claude Code helping you)
+1. **Work on your code** (with Codex helping you)
 2. **When something works:** Make a commit
 3. **Continue working** on the next thing
 4. **When you want to backup online:** Push to GitHub
@@ -299,7 +299,7 @@ Someone (or you on another computer) pushed changes you don't have. Run `git pul
 You modified files but didn't `git add` them yet. Add them, then commit.
 
 **Accidentally committed something you shouldn't have?**
-Tell Claude Code - it can help you remove files from Git history.
+Tell Codex - it can help you remove files from Git history.
 
 ---
 
