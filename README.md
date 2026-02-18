@@ -1,14 +1,16 @@
 # Welcome!
 
+<!-- fork-note:start -->
 ## Fork Note
 
 This repository is a fork of [HappyStarfish/Accessibility-mod-template](https://github.com/HappyStarfish/Accessibility-mod-template).
 
-In this fork, mentions of Claude/Claude Code were replaced with Codex, and references to `CLAUDE.md` were replaced with `AGENTS.md` so Codex can follow the guides more reliably.
+In this fork, assistant naming was normalized to Codex, and agent-file references were normalized to `AGENTS.md` so Codex can follow the guides more reliably.
 
-I tested this modified template with GPT-5.3 Codex (the latest OpenAI model available at the time of testing), and it worked very well in practice. I hope this helps people who cannot afford Claude and need higher usage limits.
+I tested this modified template with GPT-5.3 Codex (the latest OpenAI model available at the time of testing), and it worked very well in practice. I hope this helps people who need larger usage limits.
 
 Huge thanks to **Plueschyoda** for creating the original template.
+<!-- fork-note:end -->
 
 So you've seen some impressive examples of people creating entire complex mods with the help of AI, and you've been wondering if you could do the same?
 

@@ -1,0 +1,83 @@
+name: Sync Upstream
+
+on:
+  schedule:
+    - cron: "*/15 * * * *"
+  workflow_dispatch:
+    inputs:
+      upstream_branch:
+        description: "Upstream branch to merge"
+        required: false
+        default: "master"
+      target_branch:
+        description: "Branch in this fork to update"
+        required: false
+        default: "master"
+
+permissions:
+  contents: write
+
+concurrency:
+  group: sync-upstream
+  cancel-in-progress: true
+
+jobs:
+  sync:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Configure Git
+        shell: pwsh
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+      - name: Sync From Upstream + Apply Customizations
+        shell: pwsh
+        env:
+          UPSTREAM_URL: https://github.com/HappyStarfish/Accessibility-mod-template.git
+          UPSTREAM_BRANCH: ${{ github.event.inputs.upstream_branch || 'master' }}
+          TARGET_BRANCH: ${{ github.event.inputs.target_branch || 'master' }}
+        run: |
+          $ErrorActionPreference = "Stop"
+
+          git checkout $env:TARGET_BRANCH
+
+          $remoteNames = @(git remote)
+          if (-not ($remoteNames -contains "upstream")) {
+            git remote add upstream $env:UPSTREAM_URL
+          } else {
+            git remote set-url upstream $env:UPSTREAM_URL
+          }
+
+          git fetch upstream
+
+          $beforeSha = (git rev-parse HEAD).Trim()
+          git merge "upstream/$env:UPSTREAM_BRANCH" --no-edit
+
+          $changed = @(
+            git diff --name-only "$beforeSha..HEAD" |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { $_ -ne "" }
+          )
+
+          if ($changed.Count -gt 0) {
+            Write-Host "Changed files from upstream merge: $($changed.Count)"
+            pwsh -File .\scripts\apply-codex-fork-customizations.ps1 -OnlyChangedPaths $changed
+          } else {
+            Write-Host "No upstream changes detected. Skipping customization pass."
+          }
+
+          if (-not (git status --porcelain)) {
+            Write-Host "No changes to commit."
+            exit 0
+          }
+
+          git add -A
+          git commit -m "Sync upstream + apply Codex fork customizations"
+          git push origin "HEAD:$env:TARGET_BRANCH"
