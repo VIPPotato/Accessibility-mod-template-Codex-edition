@@ -45,39 +45,10 @@ jobs:
           TARGET_BRANCH: ${{ github.event.inputs.target_branch || 'master' }}
         run: |
           $ErrorActionPreference = "Stop"
-
           git checkout $env:TARGET_BRANCH
-
-          $remoteNames = @(git remote)
-          if (-not ($remoteNames -contains "upstream")) {
-            git remote add upstream $env:UPSTREAM_URL
-          } else {
-            git remote set-url upstream $env:UPSTREAM_URL
-          }
-
-          git fetch upstream
-
-          $beforeSha = (git rev-parse HEAD).Trim()
-          git merge "upstream/$env:UPSTREAM_BRANCH" --no-edit
-
-          $changed = @(
-            git diff --name-only "$beforeSha..HEAD" |
-            ForEach-Object { $_.Trim() } |
-            Where-Object { $_ -ne "" }
-          )
-
-          if ($changed.Count -gt 0) {
-            Write-Host "Changed files from upstream merge: $($changed.Count)"
-            pwsh -File .\scripts\apply-codex-fork-customizations.ps1 -OnlyChangedPaths $changed
-          } else {
-            Write-Host "No upstream changes detected. Skipping customization pass."
-          }
-
-          if (-not (git status --porcelain)) {
-            Write-Host "No changes to commit."
-            exit 0
-          }
-
-          git add -A
-          git commit -m "Sync upstream + apply Codex fork customizations"
-          git push origin "HEAD:$env:TARGET_BRANCH"
+          pwsh -File .\scripts\sync-upstream.ps1 `
+            -UpstreamUrl $env:UPSTREAM_URL `
+            -UpstreamBranch $env:UPSTREAM_BRANCH `
+            -Branch $env:TARGET_BRANCH `
+            -Commit `
+            -Push

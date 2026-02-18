@@ -39,6 +39,7 @@ What it does:
 4. Computes files changed by the merge.
 5. Runs the customization script only on those changed files.
 6. Commits and pushes customization changes when `-Commit -Push` are passed.
+7. Fails fast on unexpected merge conflicts; auto-resolves only known `CLAUDE.md` rename conflicts.
 
 If you want to inspect changes before commit/push, run without flags:
 
@@ -55,3 +56,4 @@ This repo includes `.github/workflows/sync-upstream.yml`.
 - Collects changed files from that merge.
 - Applies customizations only to those files (skips run when there are no upstream changes).
 - Commits and pushes automatically when changes exist.
+- Calls `scripts/sync-upstream.ps1` directly so local and CI behavior stay aligned.

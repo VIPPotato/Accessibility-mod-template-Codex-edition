@@ -27,6 +27,48 @@ function Invoke-Git {
     }
 }
 
+function Get-ChangedPathsFromWorkingTree {
+    $paths = New-Object System.Collections.Generic.List[string]
+
+    @(
+        (& git diff --name-only --cached),
+        (& git diff --name-only)
+    ) | ForEach-Object {
+        foreach ($line in $_) {
+            $trimmed = $line.Trim()
+            if ($trimmed -ne "") {
+                $paths.Add($trimmed)
+            }
+        }
+    }
+
+    return ($paths | Sort-Object -Unique)
+}
+
+function Resolve-KnownMergeConflicts {
+    $unmerged = @(
+        (& git diff --name-only --diff-filter=U) |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_ -ne "" }
+    )
+
+    if ($unmerged.Count -eq 0) {
+        return
+    }
+
+    $unsupported = @($unmerged | Where-Object { $_ -notmatch '(?i)CLAUDE\.md$' })
+    if ($unsupported.Count -gt 0) {
+        $list = $unsupported -join ", "
+        throw "Merge conflict requires manual resolution: $list"
+    }
+
+    Write-Step "Auto-resolving CLAUDE.md conflict(s) by taking upstream file, then reapplying customizations."
+    foreach ($path in $unmerged) {
+        Invoke-Git checkout --theirs -- $path
+        Invoke-Git add -- $path
+    }
+}
+
 $repoRoot = (Resolve-Path (Join-Path $PSScriptRoot "..")).Path
 Set-Location -LiteralPath $repoRoot
 
@@ -63,14 +105,40 @@ Write-Step "Capturing pre-merge commit"
 $beforeSha = (& git rev-parse HEAD).Trim()
 
 Write-Step "Merging upstream/$UpstreamBranch into $Branch"
-Invoke-Git merge "upstream/$UpstreamBranch" --no-edit
+$mergeOutput = & git merge "upstream/$UpstreamBranch" --no-edit 2>&1
+$mergeExit = $LASTEXITCODE
+if ($mergeExit -ne 0) {
+    Write-Step "Merge reported conflicts. Attempting known auto-resolution paths."
+    Resolve-KnownMergeConflicts
+
+    $remainingUnmerged = @(
+        (& git diff --name-only --diff-filter=U) |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_ -ne "" }
+    )
+    if ($remainingUnmerged.Count -gt 0) {
+        $list = $remainingUnmerged -join ", "
+        throw "Unresolved merge conflicts remain: $list"
+    }
+
+    & git rev-parse -q --verify MERGE_HEAD *> $null
+    if ($LASTEXITCODE -ne 0) {
+        throw "git merge failed before conflict resolution could proceed. Output: $mergeOutput"
+    }
+}
 
 Write-Step "Collecting files changed by merge"
-$changedPaths = @(
-    (& git diff --name-only "$beforeSha..HEAD") |
-    ForEach-Object { $_.Trim() } |
-    Where-Object { $_ -ne "" }
-)
+$currentHead = (& git rev-parse HEAD).Trim()
+if ($currentHead -ne $beforeSha) {
+    $changedPaths = @(
+        (& git diff --name-only "$beforeSha..HEAD") |
+        ForEach-Object { $_.Trim() } |
+        Where-Object { $_ -ne "" }
+    )
+}
+else {
+    $changedPaths = @(Get-ChangedPathsFromWorkingTree)
+}
 
 if ($changedPaths.Count -eq 0) {
     Write-Step "No upstream file changes detected. Skipping customization pass."
