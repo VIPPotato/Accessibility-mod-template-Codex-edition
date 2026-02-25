@@ -18,12 +18,12 @@ function Write-Step {
 function Invoke-Git {
     param(
         [Parameter(Mandatory = $true, ValueFromRemainingArguments = $true)]
-        [string[]]$Args
+        [string[]]$GitArgs
     )
 
-    & git @Args
+    & git @GitArgs
     if ($LASTEXITCODE -ne 0) {
-        throw "git $($Args -join ' ') failed"
+        throw "git $($GitArgs -join ' ') failed"
     }
 }
 
