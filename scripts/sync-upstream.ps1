@@ -56,13 +56,23 @@ function Resolve-KnownMergeConflicts {
         return
     }
 
-    $unsupported = @($unmerged | Where-Object { $_ -notmatch '(?i)CLAUDE\.md$' })
+    $safePatterns = @(
+        '(?i)^README\.md$',
+        '(?i)^Accessibility-Mod-Template/.*$'
+    )
+
+    $unsupported = @(
+        $unmerged | Where-Object {
+            $path = $_
+            -not ($safePatterns | Where-Object { $path -match $_ })
+        }
+    )
     if ($unsupported.Count -gt 0) {
         $list = $unsupported -join ", "
         throw "Merge conflict requires manual resolution: $list"
     }
 
-    Write-Step "Auto-resolving CLAUDE.md conflict(s) by taking upstream file, then reapplying customizations."
+    Write-Step "Auto-resolving known conflict path(s) by taking upstream version, then reapplying customizations."
     foreach ($path in $unmerged) {
         Invoke-Git checkout --theirs -- $path
         Invoke-Git add -- $path
@@ -105,7 +115,7 @@ Write-Step "Capturing pre-merge commit"
 $beforeSha = (& git rev-parse HEAD).Trim()
 
 Write-Step "Merging upstream/$UpstreamBranch into $Branch"
-$mergeOutput = & git merge "upstream/$UpstreamBranch" --no-edit 2>&1
+$mergeOutput = & git merge -X theirs "upstream/$UpstreamBranch" --no-edit 2>&1
 $mergeExit = $LASTEXITCODE
 if ($mergeExit -ne 0) {
     Write-Step "Merge reported conflicts. Attempting known auto-resolution paths."
