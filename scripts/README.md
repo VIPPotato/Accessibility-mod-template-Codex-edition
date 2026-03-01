@@ -16,6 +16,12 @@ What it does:
   - non-binary files under the repository, excluding tooling folders (`scripts/`, `.github/`, `.git/`, etc.)
 - Normalizes file references to `AGENTS.md`.
 - Ensures the fork note block exists at the top of `README.md`.
+- Validates safety invariants before exit:
+  - `Accessibility-Mod-Template/AGENTS.md` exists
+  - `Accessibility-Mod-Template/AGENTS.md` is not ignored by git
+  - no non-tooling `CLAUDE.md` or `AENTS.md` files remain
+  - no residual legacy terms (`Claude`, `Claude Code`, `CLAUDE.md`, `AENTS.md`) remain in non-tooling text files
+  - no unresolved merge markers (`<<<<<<<`, `=======`, `>>>>>>>`) remain in processed files
 
 You can limit processing to changed files:
 
@@ -39,7 +45,8 @@ What it does:
 4. Computes files changed by the merge.
 5. Runs the customization script only on those changed files.
 6. Commits and pushes customization changes when `-Commit -Push` are passed.
-7. Fails fast on unexpected merge conflicts; auto-resolves only known `CLAUDE.md` rename conflicts.
+7. Fails fast on unexpected merge conflicts; auto-resolves known fork/upstream paths (`README.md` and `Accessibility-Mod-Template/**`) by taking upstream before reapplying customizations.
+8. Aborts in-progress merges automatically if an error occurs, so the repo is not left in a broken merge state.
 
 If you want to inspect changes before commit/push, run without flags:
 

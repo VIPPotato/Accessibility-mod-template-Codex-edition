@@ -90,6 +90,16 @@ function Is-SkippedPath {
     return $Path -match '[\\/](?:\.git|\.github|\.vs|\.vscode|scripts|bin|obj|decompiled|packages|node_modules)[\\/]'
 }
 
+function Test-GitAvailable {
+    try {
+        & git --version *> $null
+        return ($LASTEXITCODE -eq 0)
+    }
+    catch {
+        return $false
+    }
+}
+
 function Replace-InFile {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -115,6 +125,67 @@ function Replace-InFile {
     }
 
     return $false
+}
+
+function Get-ConflictMarkerFiles {
+    param([Parameter(Mandatory = $true)][string[]]$Paths)
+
+    $bad = New-Object System.Collections.Generic.List[string]
+    foreach ($path in ($Paths | Sort-Object -Unique)) {
+        if (-not (Test-Path -LiteralPath $path)) { continue }
+        if (Is-BinaryFile -Path $path) { continue }
+
+        $content = Get-Content -Raw -LiteralPath $path
+        $hasStart = $content -match '(?m)^<<<<<<< '
+        $hasMid = $content -match '(?m)^=======$'
+        $hasEnd = $content -match '(?m)^>>>>>>> '
+        if ($hasStart -and $hasMid -and $hasEnd) {
+            $bad.Add($path)
+        }
+    }
+
+    return $bad
+}
+
+function Get-LegacyAgentFilePaths {
+    param([Parameter(Mandatory = $true)][string]$RepoRootFull)
+
+    $legacy = New-Object System.Collections.Generic.List[string]
+    Get-ChildItem -LiteralPath $RepoRootFull -Recurse -File |
+        Where-Object {
+            -not (Is-SkippedPath -Path $_.FullName) -and
+            ($_.Name -ieq "CLAUDE.md" -or $_.Name -ieq "AENTS.md")
+        } |
+        ForEach-Object { $legacy.Add($_.FullName) }
+
+    return $legacy
+}
+
+function Get-ResidualPatternMatches {
+    param(
+        [Parameter(Mandatory = $true)][string[]]$Paths,
+        [Parameter(Mandatory = $true)][array]$Rules
+    )
+
+    $hits = New-Object System.Collections.Generic.List[string]
+    foreach ($path in ($Paths | Sort-Object -Unique)) {
+        if (-not (Test-Path -LiteralPath $path)) { continue }
+        if (Is-BinaryFile -Path $path) { continue }
+
+        $content = Get-Content -Raw -LiteralPath $path
+        foreach ($rule in $Rules) {
+            if ([System.Text.RegularExpressions.Regex]::IsMatch(
+                $content,
+                $rule.Pattern,
+                [System.Text.RegularExpressions.RegexOptions]::IgnoreCase
+            )) {
+                $hits.Add("$path => /$($rule.Pattern)/")
+                break
+            }
+        }
+    }
+
+    return $hits
 }
 
 function Ensure-ForkNote {
@@ -179,6 +250,80 @@ Huge thanks to **Plueschyoda** for creating the original template.
     }
 
     return $false
+}
+
+function Assert-TemplateAgentsSafety {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepoRootFull,
+        [Parameter(Mandatory = $true)][string[]]$InspectionPaths,
+        [Parameter(Mandatory = $true)][array]$Rules,
+        [Parameter(Mandatory = $true)][bool]$ValidateEntireRepo
+    )
+
+    $templateAgentsRelative = "Accessibility-Mod-Template/AGENTS.md"
+    $templateAgents = Resolve-RepoPath -Root $RepoRootFull -RelativePath $templateAgentsRelative
+    if (-not $templateAgents -or -not (Test-Path -LiteralPath $templateAgents)) {
+        throw "Safety check failed: missing $templateAgentsRelative"
+    }
+
+    $templateClaudeRelative = "Accessibility-Mod-Template/CLAUDE.md"
+    $templateClaude = Resolve-RepoPath -Root $RepoRootFull -RelativePath $templateClaudeRelative
+    if ($templateClaude -and (Test-Path -LiteralPath $templateClaude)) {
+        throw "Safety check failed: $templateClaudeRelative still exists after customization"
+    }
+
+    if (Test-GitAvailable) {
+        Push-Location -LiteralPath $RepoRootFull
+        try {
+            & git check-ignore -q -- $templateAgentsRelative
+            if ($LASTEXITCODE -eq 0) {
+                throw "Safety check failed: $templateAgentsRelative is ignored by .gitignore. Fix ignore rules to allow tracking."
+            }
+        }
+        finally {
+            Pop-Location
+        }
+    }
+
+    $inspection = New-Object System.Collections.Generic.List[string]
+    foreach ($path in $InspectionPaths) { $inspection.Add($path) }
+    $inspection.Add($templateAgents)
+    $conflictFiles = @(Get-ConflictMarkerFiles -Paths ($inspection | Sort-Object -Unique))
+    if ($conflictFiles.Count -gt 0) {
+        $list = $conflictFiles -join ", "
+        throw "Safety check failed: unresolved merge markers detected in $list"
+    }
+
+    $legacyAgentFiles = @(Get-LegacyAgentFilePaths -RepoRootFull $RepoRootFull)
+    if ($legacyAgentFiles.Count -gt 0) {
+        $relativeLegacy = @(
+            $legacyAgentFiles |
+            ForEach-Object { Normalize-RepoRelativePath -Path ([System.IO.Path]::GetRelativePath($RepoRootFull, $_)) }
+        )
+        throw "Safety check failed: legacy agent filename(s) remain: $($relativeLegacy -join ', ')"
+    }
+
+    $validationTargets = New-Object System.Collections.Generic.List[string]
+    if ($ValidateEntireRepo) {
+        Get-ChildItem -LiteralPath $RepoRootFull -Recurse -File |
+            Where-Object { -not (Is-SkippedPath -Path $_.FullName) } |
+            ForEach-Object { $validationTargets.Add($_.FullName) }
+    }
+    else {
+        foreach ($path in $inspection) { $validationTargets.Add($path) }
+    }
+
+    $residualHits = @(Get-ResidualPatternMatches -Paths ($validationTargets | Sort-Object -Unique) -Rules $Rules)
+    if ($residualHits.Count -gt 0) {
+        $preview = $residualHits | Select-Object -First 10
+        $suffix = if ($residualHits.Count -gt 10) {
+            " (showing first 10 of $($residualHits.Count))"
+        }
+        else {
+            ""
+        }
+        throw "Safety check failed: residual legacy terms detected$($suffix): $($preview -join '; ')"
+    }
 }
 
 function Contains-Path {
@@ -273,5 +418,11 @@ if ((-not $hasChangedFilter) -or (Contains-Path -Paths $OnlyChangedPaths -Target
         $changed++
     }
 }
+
+Assert-TemplateAgentsSafety `
+    -RepoRootFull $repoRootFull `
+    -InspectionPaths ($targets | Sort-Object -Unique) `
+    -Rules $rules `
+    -ValidateEntireRepo (-not $hasChangedFilter)
 
 Write-Step "Customization pass complete. Files changed: $changed"

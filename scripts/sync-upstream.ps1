@@ -15,6 +15,15 @@ function Write-Step {
     Write-Host "[sync] $Message"
 }
 
+trap {
+    & git rev-parse -q --verify MERGE_HEAD *> $null
+    if ($LASTEXITCODE -eq 0) {
+        Write-Step "Error encountered. Aborting in-progress merge to keep repo clean."
+        & git merge --abort *> $null
+    }
+    throw $_
+}
+
 function Invoke-Git {
     param(
         [Parameter(Mandatory = $true, ValueFromRemainingArguments = $true)]
@@ -24,6 +33,27 @@ function Invoke-Git {
     & git @GitArgs
     if ($LASTEXITCODE -ne 0) {
         throw "git $($GitArgs -join ' ') failed"
+    }
+}
+
+function Assert-RepoSafetyPostCustomize {
+    param([Parameter(Mandatory = $true)][string]$RepoRoot)
+
+    $relative = "Accessibility-Mod-Template/AGENTS.md"
+    $fullPath = Join-Path $RepoRoot ($relative -replace '/', [System.IO.Path]::DirectorySeparatorChar)
+    if (-not (Test-Path -LiteralPath $fullPath)) {
+        throw "Safety check failed: missing $relative"
+    }
+
+    Push-Location -LiteralPath $RepoRoot
+    try {
+        & git check-ignore -q -- $relative
+        if ($LASTEXITCODE -eq 0) {
+            throw "Safety check failed: $relative is ignored by .gitignore."
+        }
+    }
+    finally {
+        Pop-Location
     }
 }
 
@@ -162,6 +192,8 @@ else {
         throw "Customization script failed."
     }
 }
+
+Assert-RepoSafetyPostCustomize -RepoRoot $repoRoot
 
 $postStatus = & git status --porcelain
 if (-not $postStatus) {
