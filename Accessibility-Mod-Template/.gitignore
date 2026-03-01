@@ -1,5 +1,5 @@
-# Claude Code local settings
-.claude/
+# Codex local settings
+.Codex/
 
 # Build output
 bin/
@@ -18,10 +18,11 @@ Desktop.ini
 .vscode/
 *.user
 *.suo
-# MelonLoader output (don't commit game DLLs)
-*.dll
-!templates/**
 
-# Local IDE settings
-.idea/
-.vscode/
+# Internal notes (not part of template)
+docs/Codex-md-improvements.md
+
+# Local files
+age-of-decadence-analyse.txt
+nul
+*.zip
