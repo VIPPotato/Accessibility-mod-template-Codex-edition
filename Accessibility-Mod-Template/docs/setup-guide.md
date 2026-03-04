@@ -796,7 +796,7 @@ After the interview:
 - **Determine mod name:** `[GameName]Access` - abbreviate if 3+ words (e.g., "PetIdleAccess", "DsaAccess" for "Das Schwarze Auge")
 - Create `project_status.md` from `templates/shared/project_status.md.template` - fill in all collected information and check off completed setup steps. **This is the central tracking document for the entire project.** Update it at every significant milestone: features completed, bugs discovered, architecture decisions, notes for the next session.
 - Create `docs/game-api.md` from `templates/shared/game-api.md.template` as placeholder for game discoveries
-- Enter the concrete paths in CLAUDE.md under "Environment"
+- Enter the concrete paths in AGENTS.md under "Environment"
 
 #### Trim AGENTS.md after setup
 
