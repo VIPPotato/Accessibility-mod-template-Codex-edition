@@ -35,4 +35,6 @@ Thumbs.db
 # Local working files (not for distribution)
 forum-post.txt
 *.local.*
-/AGENTS.md
+
+# Release zip archives
+*.zip
