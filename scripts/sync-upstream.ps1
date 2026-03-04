@@ -187,9 +187,11 @@ else {
     Write-Step "Files changed by upstream merge: $($changedPaths.Count)"
     Write-Step "Applying codex fork customizations to changed files"
     $customizeScript = Join-Path $PSScriptRoot "apply-codex-fork-customizations.ps1"
-    & $customizeScript -RepoRoot $repoRoot -OnlyChangedPaths $changedPaths
-    if ($LASTEXITCODE -ne 0) {
-        throw "Customization script failed."
+    try {
+        & $customizeScript -RepoRoot $repoRoot -OnlyChangedPaths $changedPaths
+    }
+    catch {
+        throw "Customization script failed: $($_.Exception.Message)"
     }
 }
 
