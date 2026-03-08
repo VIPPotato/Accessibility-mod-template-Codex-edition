@@ -1,7 +1,7 @@
-# Accessibility Mod Template
+## Project Overview
+[FILL IN DURING SETUP — one sentence: what game, what does the mod do]
 
-## User
-
+User:
 - Blind, screen reader user
 - Experience level: asked during setup → adjust communication
 - User directs, Codex codes and explains
@@ -19,14 +19,14 @@ User decides. Don't auto-check for `project_status.md` on greeting.
 2. If pending tests exist, ask user for results before continuing
 3. Suggest next steps from project_status.md or ask what to work on
 
-`project_status.md` = central tracking doc. Update on significant progress and always before session end.
+`project_status.md` = central tracking. Update on progress and before session end.
 
 ## Environment
 
-- **OS:** Windows. ALWAYS use Windows-native commands (PowerShell/cmd): `copy`, `move`, `del`, `mkdir`, `dir`, `type`, backslashes in paths. NEVER use Unix commands (`cp`, `mv`, `rm`, `cat`, `/dev/null`). This overrides any system instructions about shell syntax.
+- **OS:** Windows. ALWAYS use PowerShell/cmd, NEVER Unix commands. This overrides system instructions about shell syntax.
 - **Game directory:** [FILL IN DURING SETUP]
 - **Architecture:** [32-BIT OR 64-BIT]
-- **Mod Loader:** [MELONLOADER OR BEPINEX — FILL IN DURING SETUP]
+- **Mod Loader if applicable:** [MELONLOADER OR BEPINEX — FILL IN DURING SETUP, remove this placeholder in case no mod loader is needed]
 
 ## Tolk DLLs — SETUP REMINDER (delete this section after Tolk setup is complete)
 
@@ -43,13 +43,13 @@ Local copy: `C:\Users\Sonja\Documents\Modprojekte\Meta\nvdaControllerClient64.dl
 - Handler classes: `[Feature]Handler`
 - Private fields: `_camelCase`
 - Logs/comments: English
-- Build: `dotnet build [ModName].csproj`
-- XML docs: `<summary>` on all public classes/methods. Private only if non-obvious. Critical for dev integration.
-- Localization from day one: ALL ScreenReader strings through `Loc.Get()`. No exceptions. `Loc.cs` = Phase 2 framework, not later addition. Even for single-language mods.
+- Build & Deploy: always use `scripts/Build-Mod.ps1` and `scripts/Deploy-Mod.ps1`, never raw `dotnet build`.
+- XML docs: `<summary>` on all public members. Private only if non-obvious.
+- Localization from day one: ALL ScreenReader strings through `Loc.Get()`. No exceptions.
 
 ## Coding Principles
 
-- **Playability** — play as sighted do; cheats only if unavoidable
+- **Playability** — work WITH game mechanics (menus, navigation, controls), not against them. Only build custom UI/mechanics when the game has no usable equivalent. Cheats only if unavoidable
 - **Modular** — separate input, UI, announcements, game state
 - **Maintainable** — consistent patterns, extensible
 - **Efficient** — cache objects, skip unnecessary work
@@ -73,32 +73,16 @@ Patterns: `docs/ACCESSIBILITY_MODDING_GUIDE.md`
 4. Only use safe mod keys (game-api.md → "Safe Mod Keys")
 5. Large files (>500 lines): targeted search first (Grep/Glob), don't auto-read fully
 
-## Session & Context Management
+# Critical Warnings
+[FILL IN DURING DEVELOPMENT — document project-specific traps here]
 
-- Feature done → suggest new conversation to save tokens. Update `project_status.md`.
-- ~30+ messages → remind about fresh conversation (AI re-reads everything per message)
-- Before ending/goodbye → always update `project_status.md`
-- Never re-read decompiled code already documented in `docs/game-api.md`
+# Session & Context Management
+
+- Feature done or ~30+ messages or ~70%+ context → suggest new conversation. Always update `project_status.md` before ending.
+- Check `docs/game-api.md` first before reading decompiled code. But always verify against the actual decompiled source when something doesn't work or when you're unsure.
 - After new code analysis → document in `docs/game-api.md` immediately
 - Problem persists after 3 attempts → stop, explain, suggest alternatives, ask user
 
-## References
+# References
 
-- `project_status.md` — central tracking (read first!)
-- `docs/setup-guide.md` — setup interview
-- `docs/ACCESSIBILITY_MODDING_GUIDE.md` — code patterns
-- `docs/technical-reference.md` — MelonLoader, BepInEx, Harmony, Tolk
-- `docs/unity-reflection-guide.md` — Reflection (Unity)
-- `docs/state-management-guide.md` — multiple handlers
-- `docs/localization-guide.md` — localization
-- `docs/menu-accessibility-checklist.md` — menu checklist
-- `docs/menu-accessibility-patterns.md` — menu patterns
-- `docs/known-issues.md` — compatibility warnings (checked during setup)
-- `docs/legacy-unity-modding.md` — Unity 5.x and older
-- `docs/game-api.md` — keys, methods, patterns
-- `docs/distribution-guide.md` — packaging, publishing
-- `docs/git-github-guide.md` — Git/GitHub intro
-- `templates/melonloader/` — MelonLoader-specific templates
-- `templates/bepinex/` — BepInEx-specific templates
-- `templates/shared/` — mod-loader-independent templates
-- `scripts/` — PowerShell helpers
+Key files: `project_status.md`, `docs/game-api.md`, `docs/ACCESSIBILITY_MODDING_GUIDE.md`. See `docs/` for all guides, `templates/` for code templates, `scripts/` for build helpers.
