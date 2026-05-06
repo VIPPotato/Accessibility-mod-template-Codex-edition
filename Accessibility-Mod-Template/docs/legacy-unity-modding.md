@@ -118,6 +118,101 @@ Den Mod-Code direkt in die Spiel-DLL (`Assembly-CSharp.dll`) einfügen.
 - Proxy-DLL inkompatibel
 - Lösung: Proxy-DLL entfernen, anderen Ansatz wählen
 
+## C#-Sprachfeatures und alte Mono-Runtimes
+
+Unity bringt seine eigene Mono-Runtime mit. Bei alten Unity-Versionen ist diese Runtime so alt, dass bestimmte C#-Features zwar **kompilieren**, aber zur **Laufzeit abstürzen**. Das ist besonders tückisch, weil kein Compiler-Fehler auftritt — der Build ist erfolgreich, und dann crasht das Spiel ohne klare Fehlermeldung.
+
+### Wie erkennt man, welche Runtime man hat?
+
+- `Mono/` Ordner im Spielverzeichnis = alte Runtime (Unity 5.x und früher)
+- `MonoBleedingEdge/` Ordner = neuere Runtime (Unity 2017+, aber trotzdem eingeschränkt bis ~2019)
+- Ab Unity 2021+ mit `MonoBleedingEdge/` sind praktisch alle modernen C#-Features sicher
+
+### Bekannte Einschränkungen (Unity 2017 und älter)
+
+**LINQ mit Lambdas** — Crash zur Laufzeit:
+```csharp
+// CRASHT bei alter Mono-Runtime:
+var active = myList.Where(x => x.IsActive).ToList();
+var names = myList.Select(x => x.Name).ToList();
+
+// SICHER — klassische Schleife stattdessen:
+var active = new List<MyType>();
+foreach (var item in myList)
+{
+    if (item.IsActive) active.Add(item);
+}
+```
+
+**string.Join mit List** — Crash zur Laufzeit:
+```csharp
+// CRASHT — alte Mono kennt nur die Array-Überladung:
+string result = string.Join(", ", myList);
+
+// SICHER:
+string result = string.Join(", ", myList.ToArray());
+```
+
+**Switch Expressions** — Kompiliert nicht oder crasht:
+```csharp
+// CRASHT:
+string label = state switch { State.Active => "an", State.Off => "aus", _ => "?" };
+
+// SICHER:
+string label;
+switch (state)
+{
+    case State.Active: label = "an"; break;
+    case State.Off: label = "aus"; break;
+    default: label = "?"; break;
+}
+```
+
+**Sort mit Lambda** — Crash zur Laufzeit:
+```csharp
+// CRASHT:
+myList.Sort((a, b) => a.Distance.CompareTo(b.Distance));
+
+// SICHER — eigene IComparer-Klasse:
+private class DistanceComparer : IComparer<MyType>
+{
+    public int Compare(MyType a, MyType b)
+    {
+        return a.Distance.CompareTo(b.Distance);
+    }
+}
+myList.Sort(new DistanceComparer());
+```
+
+**Reflection Null-Checks** — Vergleich funktioniert nicht:
+```csharp
+// FUNKTIONIERT NICHT bei alter Mono — gibt immer false:
+if (fieldInfo == null) { ... }
+
+// SICHER — expliziter Cast:
+if ((object)fieldInfo == null) { ... }
+```
+
+### Welche Unity-Version braucht was?
+
+- **Unity 4.x:** Stark eingeschränkt. Kein LINQ, keine Lambdas, kein `var` in manchen Kontexten. Wie C# 3.0 behandeln.
+- **Unity 5.x:** LINQ-Grundfunktionen gehen (Where, Select ohne Lambda), aber Lambda-Syntax oft problematisch. Sort-Lambdas unsicher.
+- **Unity 2017-2018:** LINQ mit Lambdas geht meistens, aber string.Join mit List und Switch Expressions nicht. Reflection-Null-Checks unsicher.
+- **Unity 2019+:** Die meisten modernen C#-Features funktionieren. Trotzdem testen.
+- **Unity 2021+:** Praktisch keine Einschränkungen mehr.
+
+### Warum das funktioniert
+
+Das ist kein Hack. Der C#-Compiler erzeugt für `list.Where(x => ...)` anderen Zwischencode (IL) als für eine `foreach`-Schleife. Die alte Mono-Runtime kann den einfacheren IL ausführen, den komplexeren nicht. Beide Varianten machen exakt dasselbe — die Schleife ist die ältere, kompatible Art, dasselbe Ergebnis zu bekommen.
+
+Das betrifft nur die **Mono-Runtime des Spiels**, nicht den Mod-Loader. MelonLoader und BepInEx laufen auf dieser Runtime — sie können sie nicht ändern oder umgehen.
+
+### Empfehlung
+
+Bei Unity 2018 und älter: Die kompatiblen Varianten verwenden (Schleifen statt LINQ-Lambdas, Arrays statt Listen bei string.Join, switch-Blöcke statt switch-Expressions). Das ist kein Stilkompromiss, sondern technisch notwendig, weil die Spiel-Runtime die modernen IL-Instruktionen nicht versteht. Wenn ein Feature wider Erwarten doch funktioniert, im Code kommentieren, dass es getestet wurde — das spart dem nächsten Entwickler die gleiche Recherche.
+
+---
+
 ## Besonderheiten bei der UI-Analyse (alte Unity-Versionen)
 
 Bei älteren Unity-Versionen können zusätzliche Herausforderungen auftreten:
