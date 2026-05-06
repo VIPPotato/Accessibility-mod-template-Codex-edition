@@ -48,9 +48,28 @@ When setting up Tolk for a mod project, ALWAYS copy BOTH DLLs to the game direct
 - **Efficient** — cache object *references* (not values), skip unnecessary work. Always read live data — never silently show stale cached values
 - **Robust** — utility classes, edge cases, announce state changes
 - **Respect game controls** — never override game keys, handle rapid presses
-- **Submission-quality** — clean enough for dev integration, consistent formatting, meaningful names, no undocumented hacks
+- **Submission-quality** — clean enough for dev integration, consistent formatting, meaningful names
 
 Patterns: `docs/ACCESSIBILITY_MODDING_GUIDE.md`
+
+# Fact Discipline (game-touching code/claims only)
+
+- Every claim about game classes, methods, fields, or behavior MUST cite a source: a `file:line` in `decompiled/` or an entry in `docs/game-api.md`. No source → no claim.
+- Decompiled search empty or ambiguous → STOP, tell user, ask. Do NOT fill the gap with plausible assumptions.
+- Applies mid-debugging too: when behavior surprises you, verify against decompiled BEFORE forming a theory.
+- Marked speculation ("could be X, would need to verify") is fine. Unmarked guesses asserted as fact are not.
+- Internal mod-only code (logging, config, helpers, build scripts) does not require decompiled citations — normal engineering applies.
+
+# Workaround Discipline
+
+Before adding ANY of: try-catch that swallows, null-fallback that masks, retry/wait hack, parallel game logic, hardcoded magic value:
+
+1. State the clean solution that uses game logic directly.
+2. If you can't find one, list each clean path you considered and exactly why it is blocked (cite decompiled).
+3. Ask the user before shipping the workaround. Do not slip it in.
+4. If user approves: mark in code with `// WORKAROUND: <why clean path failed>`.
+
+A workaround without all four steps is a bug.
 
 # Error Handling
 
@@ -61,10 +80,9 @@ Patterns: `docs/ACCESSIBILITY_MODDING_GUIDE.md`
 # Before Implementation
 
 1. **GATE CHECK:** Tier 1 analysis must be complete (see project_status.md checkboxes). If game key bindings are not documented in game-api.md, STOP and do that first!
-2. Search `decompiled/` for real class/method names — NEVER guess
-3. Check `docs/game-api.md` for keys, methods, patterns
-4. Only use safe mod keys (game-api.md → "Safe Mod Keys")
-5. Files >500 lines: targeted search first, don't auto-read fully
+2. Check `docs/game-api.md` for keys, methods, patterns
+3. Only use safe mod keys (game-api.md → "Safe Mod Keys")
+4. Files >500 lines: targeted search first, don't auto-read fully
 
 # Critical Warnings
 [FILL IN DURING DEVELOPMENT — document project-specific traps here]
@@ -72,7 +90,7 @@ Patterns: `docs/ACCESSIBILITY_MODDING_GUIDE.md`
 # Session & Context Management
 
 - Feature done or ~30+ messages or ~70%+ context → suggest new conversation. Always update `project_status.md` before ending.
-- Check `docs/game-api.md` first before reading decompiled code. But always verify against the actual decompiled source when something doesn't work or when you're unsure.
+- Check `docs/game-api.md` first before reading decompiled code.
 - After new code analysis → document in `docs/game-api.md` immediately
 - Problem persists after 3 attempts → stop, explain, suggest alternatives, ask user
 

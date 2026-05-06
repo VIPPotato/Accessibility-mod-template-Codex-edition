@@ -329,7 +329,7 @@ If you want to propose your accessibility features for integration into the main
 ### What Developers Look For
 
 - Clean, consistent code style
-- No hacks or workarounds (or well-documented ones)
+- Works with game logic directly; any unavoidable workaround is marked `// WORKAROUND:` with reason
 - Minimal impact on existing code
 - Good performance (no frame drops)
 - No new dependencies if possible (Tolk is a small dependency)
