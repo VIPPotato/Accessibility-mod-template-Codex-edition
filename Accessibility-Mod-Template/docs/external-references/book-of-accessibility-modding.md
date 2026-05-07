@@ -59,5 +59,5 @@ Lehrbuch-Format, nicht Scaffold. Führt von Grund auf durch das Modden von Unity
 ## Verhältnis zu diesem Template
 
 - **Buch:** Lehrbuch + Referenz. Liest man.
-- **Dieses Template:** Ausführbares Scaffold mit Claude-Führung. Klont man, `CLAUDE.md` fragt dich durch den Setup.
+- **Dieses Template:** Ausführbares Scaffold mit Codex-Führung. Klont man, `AGENTS.md` fragt dich durch den Setup.
 - Sie überschneiden sich konzeptionell, ersetzen sich aber nicht gegenseitig.

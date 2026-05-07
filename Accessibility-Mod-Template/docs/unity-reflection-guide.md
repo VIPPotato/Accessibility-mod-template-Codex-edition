@@ -90,7 +90,7 @@ ReflectionHelper.SetPrivateField(manager, "m_IsGamepadInUse", true);
 
 ### 1. Always check decompiled code first
 
-The rule itself — "no claim without source from `decompiled/`" — lives in **CLAUDE.md (Fact Discipline)**. The Unity-specific application:
+The rule itself — "no claim without source from `decompiled/`" — lives in **AGENTS.md (Fact Discipline)**. The Unity-specific application:
 
 **Wrong:** Assuming data is accessible via UI paths
 ```csharp

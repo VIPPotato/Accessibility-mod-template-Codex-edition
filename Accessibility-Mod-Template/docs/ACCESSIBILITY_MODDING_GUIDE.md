@@ -201,7 +201,7 @@ Handler → AnnouncementManager → ScreenReader → Tolk → Screen Reader
 
 ### Quellcode-Recherche: Patterns & Beispiele
 
-Die Regel selbst — "keine Behauptung ohne Beleg aus `decompiled/` oder `docs/game-api.md`" — steht in **CLAUDE.md (Fact Discipline)**. Hier nur konkrete Suchmuster für die Recherche.
+Die Regel selbst — "keine Behauptung ohne Beleg aus `decompiled/` oder `docs/game-api.md`" — steht in **AGENTS.md (Fact Discipline)**. Hier nur konkrete Suchmuster für die Recherche.
 
 **Falsch (Raten):**
 ```csharp
