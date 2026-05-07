@@ -199,96 +199,31 @@ Handler → AnnouncementManager → ScreenReader → Tolk → Screen Reader
 
 ## Code Architecture Recommendations
 
-### Quellcode-Recherche vor der Implementierung
+### Quellcode-Recherche: Patterns & Beispiele
 
-**KRITISCH: Niemals raten, immer verifizieren!**
+Die Regel selbst — "keine Behauptung ohne Beleg aus `decompiled/` oder `docs/game-api.md`" — steht in **CLAUDE.md (Fact Discipline)**. Hier nur konkrete Suchmuster für die Recherche.
 
-Bevor du einen neuen Handler schreibst, eine Spielmechanik ansprichst oder UI-Elemente referenzierst, MUSST du den dekompilierten Quellcode im `decompiled/` Ordner durchsuchen. Das Erraten von Klassennamen, Methodennamen oder Spielmechaniken führt unweigerlich zu Fehlern.
-
-#### Warum ist das so wichtig?
-
-- Spiele verwenden oft unerwartete Namenskonventionen (z.B. `CardZone` statt `Hand`, `UIManager` statt `GameUI`)
-- Interne Mechaniken funktionieren selten so, wie man es von außen vermutet
-- Falsche Annahmen führen zu Code, der kompiliert aber nicht funktioniert - schwer zu debuggen
-- Reflection auf nicht-existente Felder schlägt still fehl
-
-#### Was muss VOR jeder Implementierung geprüft werden?
-
-**Bei neuen Handlern:**
-- Wie heißt die UI-Klasse/das Panel genau? (`decompiled/` durchsuchen)
-- Welche Methoden hat sie? (IsOpen, Show, Hide, etc.)
-- Wie ist die Hierarchie aufgebaut? (Parent-Child-Beziehungen)
-- Welche Events/Callbacks existieren?
-
-**Bei Spielmechaniken:**
-- Wie heißen die relevanten Klassen? (z.B. `InventoryManager`, `PlayerInventory`, `ItemStorage`?)
-- Welche Properties/Felder sind öffentlich zugänglich?
-- Gibt es Singleton-Instanzen? Wie greift man darauf zu?
-- Welche Methoden ändern den Zustand?
-
-**Bei UI-Elementen:**
-- Exakte Namen der GameObjects/Panels
-- Komponententypen (Text, TextMeshProUGUI, Button, etc.)
-- Verschachtelung und Pfade in der Hierarchie
-
-**Bei Tasteneingaben:**
-- Wie verarbeitet das Spiel Input? (Unity Input, InputSystem, Custom?)
-- Welche Tasten sind bereits belegt?
-- Gibt es InputBlocker oder Fokus-Systeme?
-
-#### Typische Suchmuster im dekompilierten Code
-
-```
-Grep-Pattern für UI-Screens:
-- "class.*Menu" oder "class.*Screen" oder "class.*Panel"
-- "public static.*Instance" (für Singletons)
-- "void Show" oder "void Open" oder "void Display"
-
-Grep-Pattern für Spielmechaniken:
-- "class.*Manager" oder "class.*Controller"
-- "public.*List<" oder "public.*Dictionary<" (für Sammlungen)
-- "static.*Current" oder "static.*Active" (für aktiven Zustand)
-
-Grep-Pattern für spezifische Features:
-- Suche nach dem englischen Begriff der Mechanik
-- Suche nach UI-Text, der im Spiel sichtbar ist
-- Suche nach Variablennamen, die logisch erscheinen
-```
-
-#### Checkliste vor der Implementierung
-
-Bevor du Code schreibst, stelle sicher:
-
-- [ ] Relevante Klassen im `decompiled/` Ordner gefunden
-- [ ] Exakte Klassennamen notiert (Groß-/Kleinschreibung!)
-- [ ] Zugriffsmethode verstanden (Singleton? FindObjectOfType? Referenz?)
-- [ ] Öffentliche API der Klasse bekannt (Methoden, Properties)
-- [ ] Erkenntnisse in `docs/game-api.md` dokumentiert
-
-#### Beispiel: Falsches vs. Richtiges Vorgehen
-
-**FALSCH (Raten):**
+**Falsch (Raten):**
 ```csharp
-// "Das Inventar heißt bestimmt InventoryPanel..."
 var inventory = GameObject.Find("InventoryPanel");
-// Funktioniert nicht - heißt in Wirklichkeit "UI_Inventory_Main"
+// Funktioniert nicht — heißt in Wirklichkeit "UI_Inventory_Main"
 ```
 
-**RICHTIG (Recherchieren):**
-```
-1. Grep im decompiled/ Ordner: "Inventory"
-2. Finde: class UI_Inventory_Main : MonoBehaviour
-3. Prüfe: Hat static Instance Property? Ja!
-4. Code: var inventory = UI_Inventory_Main.Instance;
-```
+**Richtig (Recherchieren):**
+1. Grep im `decompiled/`: `Inventory`
+2. Finde: `class UI_Inventory_Main : MonoBehaviour`
+3. Prüfe öffentliche API (Singleton? Methoden? Properties?)
+4. Code: `var inventory = UI_Inventory_Main.Instance;`
 
-#### Wann erneut recherchieren?
+**Typische Grep-Patterns:**
+- UI-Screens: `class.*Menu`, `class.*Screen`, `class.*Panel`
+- Singletons: `public static.*Instance`
+- Manager/Controller: `class.*Manager`, `class.*Controller`
+- Aktiver Zustand: `static.*Current`, `static.*Active`
+- Sammlungen: `public.*List<`, `public.*Dictionary<`
+- Feature-spezifisch: englischer Begriff der Mechanik, sichtbarer UI-Text, logisch erscheinende Variablennamen
 
-- Bei JEDEM neuen Handler
-- Bei JEDER neuen Spielmechanik
-- Wenn Code unerwartet nicht funktioniert
-- Wenn Reflection fehlschlägt
-- Nach Spiel-Updates (Namen können sich ändern)
+Erkenntnisse aus jeder Recherche → sofort in `docs/game-api.md`.
 
 ### Core Principles
 - **Modular** - Separate concerns: input handling, UI extraction, announcement, game state

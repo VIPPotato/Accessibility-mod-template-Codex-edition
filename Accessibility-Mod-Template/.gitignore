@@ -20,7 +20,8 @@ Desktop.ini
 *.suo
 
 # Internal notes (not part of template)
-docs/Codex-md-improvements.md
+docs/claude-md-improvements.md
+docs/lessons-from-starcomaccess.md
 
 # Local files
 age-of-decadence-analyse.txt
